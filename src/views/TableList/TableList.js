@@ -73,6 +73,7 @@ function TableList (props) {
                 tableHead={['Name', 'Country', 'Website', 'Domain']}
                 tableData={props.list}
                 deleteItem={props.deleteItem}
+                editItem = {props.editItem}
               />
             </CardBody>
           </Card>

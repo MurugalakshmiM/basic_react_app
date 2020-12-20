@@ -1,4 +1,4 @@
-import React, {useEffect} from 'react'
+import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
 // @material-ui/core components
 import { makeStyles } from '@material-ui/core/styles'
@@ -12,9 +12,11 @@ import TablePagination from '@material-ui/core/TablePagination'
 import TableFooter from '@material-ui/core/TableFooter'
 import EditIcon from '@material-ui/icons/Edit'
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
+import TextField from '@material-ui/core/TextField'
 
 // core components
 import styles from 'assets/jss/material-dashboard-react/components/tableStyle.js'
+import DoneIcon from '@material-ui/icons/Done';
 
 const useStyles = makeStyles(styles)
 
@@ -22,17 +24,33 @@ export default function CustomTable (props) {
   const [page, setPage] = React.useState(0)
   const [rowsPerPage, setRowsPerPage] = React.useState(10)
   const classes = useStyles()
-  let [tableList , setTableList] = React.useState([])
+  let [tableList, setTableList] = React.useState([])
   let { tableHead, tableHeaderColor, tableData } = props
+  const [edit, setEdit] = React.useState(false)
+  const [editRow, setEditRow] = React.useState('')
+  const [name, setName] = React.useState('')
+  const [website, setWebsite] = React.useState('')
+  const [domain, setDomain] = React.useState('')
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage)
   }
 
-  const onDelete = (row) => {
-    tableData = tableData.filter((data, index) => index!==row)
-    console.log(row)
-    setTableList(tableData)
+  const onEdit = (row, prop) => {
+    setEdit(true)
+    setEditRow(row)
+    setName(prop.name)
+    setWebsite(prop.web_pages[0])
+    setDomain(prop.domains[0])
+  }
+
+  const onEditSuccess = (row) => {
+    setEdit(false)
+    setEditRow("")
+    setName("")
+    setWebsite("")
+    setDomain("")
+    props.editItem(page * rowsPerPage + row, { name, web_pages: [website], domains: [domain], country: "Turkey" })
   }
   const handleChangeRowsPerPage = event => {
     setRowsPerPage(+event.target.value)
@@ -70,25 +88,73 @@ export default function CustomTable (props) {
             ).map((prop, key) => {
               return (
                 <TableRow key={key} className={classes.tableBodyRow}>
-                  <TableCell className={classes.tableCell} >
-                    {prop.name}
+                  <TableCell className={classes.tableCell}>
+                    {edit && editRow == key ? (
+                      <TextField
+                        id='outlined-basic'
+                        label='Name'
+                        variant='outlined'
+                        value={name}
+                        onChange={e => {
+                          setName(e.target.value)
+                        }}
+                      />
+                    ) : (
+                      prop.name
+                    )}
                   </TableCell>
                   <TableCell className={classes.tableCell}>
                     {prop.country}
                   </TableCell>
-                  <TableCell className={classes.tableCell} >
-                    {prop.web_pages[0]}
-                  </TableCell>
-                  <TableCell className={classes.tableCell} >
-                    {prop.domains[0]}
+                  <TableCell className={classes.tableCell}>
+                    {edit && editRow == key ? (
+                      <TextField
+                        id='outlined-basic'
+                        label='Website'
+                        variant='outlined'
+                        value={website}
+                        onChange={e => {
+                          setWebsite(e.target.value)
+                        }}
+                      />
+                    ) : (
+                      prop.web_pages[0]
+                    )}
                   </TableCell>
                   <TableCell className={classes.tableCell}>
-                    <div>
-                      <EditIcon />
+                    {edit && editRow == key ? (
+                      <TextField
+                        id='outlined-basic'
+                        label='Domain'
+                        variant='outlined'
+                        value={domain}
+                        onChange={e => {
+                          setDomain(e.target.value)
+                        }}
+                      />
+                    ) : (
+                      prop.domains[0]
+                    )}
+                  </TableCell>
+                  <TableCell className={classes.tableCell}>
+                    {edit && editRow == key ? (
+                      <div onClick={() => onEditSuccess(key)}>
+                      <DoneIcon />
                     </div>
-                    <div onClick={() => props.deleteItem((page * rowsPerPage)+key)}>
-                      <DeleteForeverIcon />
-                    </div>
+                    ) : (
+                      <div>
+                        <div onClick={() => onEdit(key, prop)}>
+                          <EditIcon />
+                        </div>
+                        <div
+                          onClick={() =>
+                            props.deleteItem(page * rowsPerPage + key)
+                          }
+                        >
+                          <DeleteForeverIcon />
+                        </div>
+                      </div>
+                    )}
                   </TableCell>
                 </TableRow>
               )

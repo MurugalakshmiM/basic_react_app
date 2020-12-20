@@ -9,8 +9,11 @@ const reducer_1 = (state = [], action) => {
       const newState = state.filter((data, index) => index !== action.index)
       return newState
     case 'ADD':
-      const addedList = [action.data,...state]
+      const addedList = [action.data, ...state]
       return addedList
+    case 'EDIT':
+      state[action.index] = action.data
+      return [...state]
     default:
       return state
   }

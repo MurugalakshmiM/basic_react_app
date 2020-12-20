@@ -20,7 +20,7 @@ export default function BasicTextFields (props) {
 
   const addItems = () => {
     console.log("done")
-    props.addItem({ name, web_pages: [website], domains: [domain] })
+    props.addItem({ name, web_pages: [website], domains: [domain], country: "Turkey" })
     setName("")
     setWebsite("")
     setDomain("")
