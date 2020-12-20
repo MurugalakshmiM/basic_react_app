@@ -13,10 +13,16 @@ import TableFooter from '@material-ui/core/TableFooter'
 import EditIcon from '@material-ui/icons/Edit'
 import DeleteForeverIcon from '@material-ui/icons/DeleteForever'
 import TextField from '@material-ui/core/TextField'
+import Dialog from '@material-ui/core/Dialog'
+import DialogActions from '@material-ui/core/DialogActions'
+import DialogContent from '@material-ui/core/DialogContent'
+import DialogContentText from '@material-ui/core/DialogContentText'
+import DialogTitle from '@material-ui/core/DialogTitle'
+import Button from '@material-ui/core/Button'
 
 // core components
 import styles from 'assets/jss/material-dashboard-react/components/tableStyle.js'
-import DoneIcon from '@material-ui/icons/Done';
+import DoneIcon from '@material-ui/icons/Done'
 
 const useStyles = makeStyles(styles)
 
@@ -31,6 +37,8 @@ export default function CustomTable (props) {
   const [name, setName] = React.useState('')
   const [website, setWebsite] = React.useState('')
   const [domain, setDomain] = React.useState('')
+  const [open, setOpen] = React.useState(false)
+  const [rowKey , setRowKey] = React.useState("")
 
   const handleChangePage = (event, newPage) => {
     setPage(newPage)
@@ -44,14 +52,34 @@ export default function CustomTable (props) {
     setDomain(prop.domains[0])
   }
 
-  const onEditSuccess = (row) => {
+  const onEditSuccess = row => {
     setEdit(false)
-    setEditRow("")
-    setName("")
-    setWebsite("")
-    setDomain("")
-    props.editItem(page * rowsPerPage + row, { name, web_pages: [website], domains: [domain], country: "Turkey" })
+    setEditRow('')
+    setName('')
+    setWebsite('')
+    setDomain('')
+    props.editItem(page * rowsPerPage + row, {
+      name,
+      web_pages: [website],
+      domains: [domain],
+      country: 'Turkey'
+    })
   }
+
+  const handleClickOpen = key => {
+    setRowKey(key)
+    setOpen(true)
+  }
+
+  const handleClose = (key) => {
+    setOpen(false)
+    console.log(key)
+    if (key) {
+      props.deleteItem(page * rowsPerPage + rowKey)
+    }
+    setRowKey("")
+  }
+
   const handleChangeRowsPerPage = event => {
     setRowsPerPage(+event.target.value)
     setPage(0)
@@ -139,19 +167,45 @@ export default function CustomTable (props) {
                   <TableCell className={classes.tableCell}>
                     {edit && editRow == key ? (
                       <div onClick={() => onEditSuccess(key)}>
-                      <DoneIcon />
-                    </div>
+                        <DoneIcon />
+                      </div>
                     ) : (
                       <div>
                         <div onClick={() => onEdit(key, prop)}>
                           <EditIcon />
                         </div>
-                        <div
-                          onClick={() =>
-                            props.deleteItem(page * rowsPerPage + key)
-                          }
-                        >
-                          <DeleteForeverIcon />
+                        <div>
+                          <div onClick={() => handleClickOpen (key)}>
+                            <DeleteForeverIcon />
+                          </div>
+                          <Dialog
+                            open={open}
+                            onClose={handleClose}
+                            aria-labelledby='alert-dialog-title'
+                            aria-describedby='alert-dialog-description'
+                          >
+                            <DialogTitle id='alert-dialog-title'>
+                              {'Delete Content'}
+                            </DialogTitle>
+                            <DialogContent>
+                              <DialogContentText id='alert-dialog-description'>
+                                This action will permanently delete the row in
+                                list
+                              </DialogContentText>
+                            </DialogContent>
+                            <DialogActions>
+                              <Button onClick={() => handleClose(false)} color='primary'>
+                                Disagree
+                              </Button>
+                              <Button
+                                onClick={() => handleClose(true)}
+                                color='primary'
+                                autoFocus
+                              >
+                                Agree
+                              </Button>
+                            </DialogActions>
+                          </Dialog>
                         </div>
                       </div>
                     )}
